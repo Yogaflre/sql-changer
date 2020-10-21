@@ -354,6 +354,7 @@ primaryExpression
     | POSITION '(' valueExpression IN valueExpression ')'                                 #position
     | '(' expression (',' expression)+ ')'                                                #rowConstructor
     | ROW '(' expression (',' expression)* ')'                                            #rowConstructor
+    | ARRAY '(' (expression (',' expression)*)? ')'                                       #arrayConstructor
     | qualifiedName '(' ASTERISK ')' filter? over?                                        #functionCall
     | qualifiedName '(' (setQuantifier? expression (',' expression)*)?
         (ORDER BY sortItem (',' sortItem)*)? ')' filter? (nullTreatment? over)?           #functionCall
@@ -366,7 +367,6 @@ primaryExpression
     | CASE whenClause+ (ELSE elseExpression=expression)? END                              #searchedCase
     | CAST '(' expression AS type ')'                                                     #cast
     | TRY_CAST '(' expression AS type ')'                                                 #cast
-    | ARRAY '[' (expression (',' expression)*)? ']'                                       #arrayConstructor
     | value=primaryExpression '[' index=valueExpression ']'                               #subscript
     | identifier                                                                          #columnReference
     | base=primaryExpression '.' fieldName=identifier                                     #dereference
