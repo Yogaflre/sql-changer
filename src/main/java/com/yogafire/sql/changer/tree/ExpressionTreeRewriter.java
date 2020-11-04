@@ -625,7 +625,7 @@ public final class ExpressionTreeRewriter<C>
                     .map(escape -> rewrite(escape, context.get()));
 
             if (value != node.getValue() || pattern != node.getPattern() || !sameElements(node.getEscape(), rewrittenEscape)) {
-                return new LikePredicate(value, pattern, rewrittenEscape);
+                return new LikePredicate(node.getType(), value, pattern, rewrittenEscape);
             }
 
             return node;

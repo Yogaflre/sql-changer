@@ -22,29 +22,25 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 
 public class ArithmeticUnaryExpression
-        extends Expression
-{
-    public enum Sign
-    {
+        extends Expression {
+    public enum Sign {
         PLUS,
-        MINUS
+        MINUS,
+        BIT_NOT,
     }
 
     private final Expression value;
     private final Sign sign;
 
-    public ArithmeticUnaryExpression(Sign sign, Expression value)
-    {
+    public ArithmeticUnaryExpression(Sign sign, Expression value) {
         this(Optional.empty(), sign, value);
     }
 
-    public ArithmeticUnaryExpression(NodeLocation location, Sign sign, Expression value)
-    {
+    public ArithmeticUnaryExpression(NodeLocation location, Sign sign, Expression value) {
         this(Optional.of(location), sign, value);
     }
 
-    private ArithmeticUnaryExpression(Optional<NodeLocation> location, Sign sign, Expression value)
-    {
+    private ArithmeticUnaryExpression(Optional<NodeLocation> location, Sign sign, Expression value) {
         super(location);
         requireNonNull(value, "value is null");
         requireNonNull(sign, "sign is null");
@@ -53,51 +49,46 @@ public class ArithmeticUnaryExpression
         this.sign = sign;
     }
 
-    public static ArithmeticUnaryExpression positive(NodeLocation location, Expression value)
-    {
+    public static ArithmeticUnaryExpression bitNot(NodeLocation location, Expression value) {
+        return new ArithmeticUnaryExpression(Optional.of(location), Sign.BIT_NOT, value);
+    }
+
+    public static ArithmeticUnaryExpression positive(NodeLocation location, Expression value) {
         return new ArithmeticUnaryExpression(Optional.of(location), Sign.PLUS, value);
     }
 
-    public static ArithmeticUnaryExpression negative(NodeLocation location, Expression value)
-    {
+    public static ArithmeticUnaryExpression negative(NodeLocation location, Expression value) {
         return new ArithmeticUnaryExpression(Optional.of(location), Sign.MINUS, value);
     }
 
-    public static ArithmeticUnaryExpression positive(Expression value)
-    {
+    public static ArithmeticUnaryExpression positive(Expression value) {
         return new ArithmeticUnaryExpression(Optional.empty(), Sign.PLUS, value);
     }
 
-    public static ArithmeticUnaryExpression negative(Expression value)
-    {
+    public static ArithmeticUnaryExpression negative(Expression value) {
         return new ArithmeticUnaryExpression(Optional.empty(), Sign.MINUS, value);
     }
 
-    public Expression getValue()
-    {
+    public Expression getValue() {
         return value;
     }
 
-    public Sign getSign()
-    {
+    public Sign getSign() {
         return sign;
     }
 
     @Override
-    public <R, C> R accept(AstVisitor<R, C> visitor, C context)
-    {
+    public <R, C> R accept(AstVisitor<R, C> visitor, C context) {
         return visitor.visitArithmeticUnary(this, context);
     }
 
     @Override
-    public List<Node> getChildren()
-    {
+    public List<Node> getChildren() {
         return ImmutableList.of(value);
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -111,8 +102,7 @@ public class ArithmeticUnaryExpression
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(value, sign);
     }
 }

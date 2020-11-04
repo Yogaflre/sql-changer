@@ -3,6 +3,7 @@ package com.yogafire.sql.changer.formatter.base;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.yogafire.sql.changer.exception.UnsupportedSqlException;
 import com.yogafire.sql.changer.tree.*;
 
 import java.util.ArrayList;
@@ -910,7 +911,7 @@ public class BaseSqlFormatter extends AstVisitor<Void, Integer> {
     @Override
     protected Void visitInsert(Insert node, Integer indent) {
         if (node.getType() == Insert.InsertType.OVERWRITE) {
-            throw new UnsupportedOperationException("'INSERT OVERWRITE' not supported in BaseSqlFormatter");
+            throw new UnsupportedSqlException("[base] Not supported 'INSERT OVERWRITE'");
         }
         builder.append("INSERT INTO ")
                 .append(node.getTarget());

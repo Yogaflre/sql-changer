@@ -185,7 +185,7 @@ class AstBuilder
         }
 
         return new Insert(
-                getInsertType(context.insertType),
+                Insert.InsertType.valueOf(context.insertType.getText()),
                 getQualifiedName(context.qualifiedName()),
                 columnAliases,
                 (Query) visit(context.query()));
@@ -980,6 +980,7 @@ class AstBuilder
     @Override
     public Node visitLike(SqlBaseParser.LikeContext context) {
         Expression result = new LikePredicate(
+                LikePredicate.LikeType.valueOf(context.likeType.getText()),
                 getLocation(context),
                 (Expression) visit(context.value),
                 (Expression) visit(context.pattern),
@@ -1046,6 +1047,8 @@ class AstBuilder
                 return ArithmeticUnaryExpression.negative(getLocation(context), child);
             case SqlBaseLexer.PLUS:
                 return ArithmeticUnaryExpression.positive(getLocation(context), child);
+            case SqlBaseLexer.BIT_NOT:
+                return ArithmeticUnaryExpression.bitNot(getLocation(context), child);
             default:
                 throw new UnsupportedOperationException("Unsupported sign: " + context.operator.getText());
         }
@@ -1700,6 +1703,18 @@ class AstBuilder
                 return ArithmeticBinaryExpression.Operator.DIVIDE;
             case SqlBaseLexer.PERCENT:
                 return ArithmeticBinaryExpression.Operator.MODULUS;
+            case SqlBaseLexer.BIT_AND:
+                return ArithmeticBinaryExpression.Operator.BIT_AND;
+            case SqlBaseLexer.BIT_OR:
+                return ArithmeticBinaryExpression.Operator.BIT_OR;
+            case SqlBaseLexer.BIT_NOT:
+                return ArithmeticBinaryExpression.Operator.BIT_NOT;
+            case SqlBaseLexer.BIT_XOR:
+                return ArithmeticBinaryExpression.Operator.BIT_XOR;
+            case SqlBaseLexer.BIT_L_SHIFT:
+                return ArithmeticBinaryExpression.Operator.BIT_L_SHIFT;
+            case SqlBaseLexer.BIT_R_SHIFT:
+                return ArithmeticBinaryExpression.Operator.BIT_R_SHIFT;
         }
 
         throw new UnsupportedOperationException("Unsupported operator: " + operator.getText());
@@ -1835,17 +1850,6 @@ class AstBuilder
         }
 
         throw new IllegalArgumentException("Unsupported ordering: " + token.getText());
-    }
-
-    private static Insert.InsertType getInsertType(Token token) {
-        switch (token.getType()) {
-            case SqlBaseLexer.INTO:
-                return Insert.InsertType.INTO;
-            case SqlBaseLexer.OVERWRITE:
-                return Insert.InsertType.OVERWRITE;
-        }
-
-        throw new IllegalArgumentException("Unsupported insert type: " + token.getText());
     }
 
     private static SortItem.Ordering getOrderingType(Token token) {

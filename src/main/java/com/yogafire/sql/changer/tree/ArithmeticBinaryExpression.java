@@ -28,7 +28,14 @@ public class ArithmeticBinaryExpression
         SUBTRACT("-"),
         MULTIPLY("*"),
         DIVIDE("/"),
-        MODULUS("%");
+        MODULUS("%"),
+        BIT_AND("&"),
+        BIT_OR("|"),
+        BIT_NOT("!"),
+        BIT_XOR("^"),
+        BIT_L_SHIFT("<<"),
+        BIT_R_SHIFT(">>"),
+        ;
         private final String value;
 
         Operator(String value)

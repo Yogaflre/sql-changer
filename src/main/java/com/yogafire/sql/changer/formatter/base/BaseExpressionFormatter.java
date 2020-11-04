@@ -216,23 +216,7 @@ public class BaseExpressionFormatter extends AstVisitor<String, Void> {
     @Override
     protected String visitFunctionCall(FunctionCall node, Void context) {
         StringBuilder builder = new StringBuilder();
-
-        String arguments = joinExpressions(node.getArguments());
-        if (node.getArguments().isEmpty() && "count".equalsIgnoreCase(node.getName().getSuffix())) {
-            arguments = "*";
-        }
-        if (node.isDistinct()) {
-            arguments = "DISTINCT " + arguments;
-        }
-
-        builder.append(formatQualifiedName(node.getName()))
-                .append('(').append(arguments);
-
-        if (node.getOrderBy().isPresent()) {
-            builder.append(' ').append(formatOrderBy(node.getOrderBy().get(), parameters));
-        }
-
-        builder.append(')');
+        functionConvert(builder, node);
 
         if (node.isIgnoreNulls()) {
             builder.append(" IGNORE NULLS");
@@ -338,6 +322,8 @@ public class BaseExpressionFormatter extends AstVisitor<String, Void> {
                 return "-" + separator + value;
             case PLUS:
                 return "+" + value;
+            case BIT_NOT:
+                return "!" + value;
             default:
                 throw new UnsupportedOperationException("Unsupported sign: " + node.getSign());
         }
@@ -354,7 +340,9 @@ public class BaseExpressionFormatter extends AstVisitor<String, Void> {
 
         builder.append('(')
                 .append(process(node.getValue(), context))
-                .append(" LIKE ")
+                .append(" ")
+                .append(node.getType().toString())
+                .append(" ")
                 .append(process(node.getPattern(), context));
 
         node.getEscape().ifPresent(escape -> {
@@ -438,7 +426,7 @@ public class BaseExpressionFormatter extends AstVisitor<String, Void> {
         return "(" + joinExpressions(node.getValues()) + ")";
     }
 
-    private String visitFilter(Expression node, Void context) {
+    public String visitFilter(Expression node, Void context) {
         return "(WHERE " + process(node, context) + ')';
     }
 
@@ -517,7 +505,7 @@ public class BaseExpressionFormatter extends AstVisitor<String, Void> {
         return '(' + process(left, null) + ' ' + operator + ' ' + process(right, null) + ')';
     }
 
-    private String joinExpressions(List<Expression> expressions) {
+    public String joinExpressions(List<Expression> expressions) {
         return Joiner.on(", ").join(expressions.stream()
                 .map((e) -> process(e, null))
                 .iterator());
@@ -658,5 +646,29 @@ public class BaseExpressionFormatter extends AstVisitor<String, Void> {
 
     private static final ThreadLocal<DecimalFormat> doubleFormatter = ThreadLocal.withInitial(
             () -> new DecimalFormat("0.###################E0###", new DecimalFormatSymbols(Locale.US)));
+
+
+    public void functionConvert(StringBuilder builder, FunctionCall node) {
+        String arguments = joinExpressions(node.getArguments());
+        if (node.getArguments().isEmpty() && "count".equalsIgnoreCase(node.getName().getSuffix())) {
+            arguments = "*";
+        }
+        if (node.isDistinct()) {
+            arguments = "DISTINCT " + arguments;
+        }
+
+        builder.append(realFunctionName(node.getName().toString()))
+                .append('(').append(arguments);
+
+        if (node.getOrderBy().isPresent()) {
+            builder.append(' ').append(formatOrderBy(node.getOrderBy().get(), parameters));
+        }
+
+        builder.append(')');
+    }
+
+    public String realFunctionName(String name) {
+        return name;
+    }
 }
 

@@ -24,35 +24,45 @@ import static java.util.Objects.requireNonNull;
 public class LikePredicate
         extends Expression
 {
+    public enum LikeType {
+        LIKE, RLIKE;
+    }
+    private final LikeType type;
     private final Expression value;
     private final Expression pattern;
     private final Optional<Expression> escape;
 
-    public LikePredicate(Expression value, Expression pattern, Expression escape)
+    public LikePredicate(LikeType type, Expression value, Expression pattern, Expression escape)
     {
-        this(Optional.empty(), value, pattern, Optional.of(escape));
+        this(type, Optional.empty(), value, pattern, Optional.of(escape));
     }
 
-    public LikePredicate(NodeLocation location, Expression value, Expression pattern, Optional<Expression> escape)
+    public LikePredicate(LikeType type,NodeLocation location, Expression value, Expression pattern, Optional<Expression> escape)
     {
-        this(Optional.of(location), value, pattern, escape);
+        this(type, Optional.of(location), value, pattern, escape);
     }
 
-    public LikePredicate(Expression value, Expression pattern, Optional<Expression> escape)
+    public LikePredicate(LikeType type,Expression value, Expression pattern, Optional<Expression> escape)
     {
-        this(Optional.empty(), value, pattern, escape);
+        this(type, Optional.empty(), value, pattern, escape);
     }
 
-    private LikePredicate(Optional<NodeLocation> location, Expression value, Expression pattern, Optional<Expression> escape)
+    private LikePredicate(LikeType type,Optional<NodeLocation> location, Expression value, Expression pattern, Optional<Expression> escape)
     {
         super(location);
+        requireNonNull(type, "type is null");
         requireNonNull(value, "value is null");
         requireNonNull(pattern, "pattern is null");
         requireNonNull(escape, "escape is null");
 
+        this.type = type;
         this.value = value;
         this.pattern = pattern;
         this.escape = escape;
+    }
+
+    public LikeType getType() {
+        return type;
     }
 
     public Expression getValue()

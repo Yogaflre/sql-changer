@@ -327,7 +327,7 @@ predicate[ParserRuleContext value]
     | NOT? BETWEEN lower=valueExpression AND upper=valueExpression        #between
     | NOT? IN '(' expression (',' expression)* ')'                        #inList
     | NOT? IN '(' query ')'                                               #inSubquery
-    | NOT? LIKE pattern=valueExpression (ESCAPE escape=valueExpression)?  #like
+    | NOT? likeType=(LIKE | RLIKE) pattern=valueExpression (ESCAPE escape=valueExpression)?  #like
     | IS NOT? NULL                                                        #nullPredicate
     | IS NOT? DISTINCT FROM right=valueExpression                         #distinctFrom
     ;
@@ -335,9 +335,11 @@ predicate[ParserRuleContext value]
 valueExpression
     : primaryExpression                                                                 #valueExpressionDefault
     | valueExpression AT timeZoneSpecifier                                              #atTimeZone
-    | operator=(MINUS | PLUS) valueExpression                                           #arithmeticUnary
+    | operator=(MINUS | PLUS | BIT_NOT) valueExpression                                 #arithmeticUnary
     | left=valueExpression operator=(ASTERISK | SLASH | PERCENT) right=valueExpression  #arithmeticBinary
     | left=valueExpression operator=(PLUS | MINUS) right=valueExpression                #arithmeticBinary
+    | left=valueExpression operator=(BIT_AND | BIT_OR | BIT_XOR) right=valueExpression  #arithmeticBinary
+    | left=valueExpression operator=(BIT_L_SHIFT | BIT_R_SHIFT) right=valueExpression   #arithmeticBinary
     | left=valueExpression CONCAT right=valueExpression                                 #concatenation
     ;
 
@@ -660,6 +662,7 @@ LATERAL: 'LATERAL';
 LEFT: 'LEFT';
 LEVEL: 'LEVEL';
 LIKE: 'LIKE';
+RLIKE: 'RLIKE';
 LIMIT: 'LIMIT';
 LOCALTIME: 'LOCALTIME';
 LOCALTIMESTAMP: 'LOCALTIMESTAMP';
@@ -777,6 +780,12 @@ ASTERISK: '*';
 SLASH: '/';
 PERCENT: '%';
 CONCAT: '||';
+BIT_AND: '&';
+BIT_OR: '|';
+BIT_XOR: '^';
+BIT_NOT: '!';
+BIT_L_SHIFT: '<<';
+BIT_R_SHIFT: '>>';
 
 STRING
     : '\'' ( ~'\'' | '\'\'' )* '\''
